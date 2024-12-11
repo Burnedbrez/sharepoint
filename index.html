@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Script Loader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script>
+        // Ensure the script runs after the SharePoint page is loaded
+        $(document).ready(function () {
+            // Load the SP.js library for accessing SharePoint user properties
+            SP.SOD.executeFunc('sp.js', 'SP.ClientContext', function () {
+                // Get the current client context
+                var clientContext = SP.ClientContext.get_current();
+                // Get the web and the current user
+                var web = clientContext.get_web();
+                var currentUser = web.get_currentUser();
+
+                // Load the user properties
+                clientContext.load(currentUser);
+                clientContext.executeQueryAsync(
+                    function () {
+                        // On success, update the header with the user's name
+                        var userName = currentUser.get_title();
+                        $('body').prepend(`<h1 style="text-align: center; margin: 20px; color: #333;">Hello, ${userName}!</h1>`);
+                    },
+                    function (sender, args) {
+                        // On failure, log the error
+                        console.error("Error retrieving user information: " + args.get_message());
+                    }
+                );
+            });
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>
